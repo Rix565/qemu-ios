@@ -4,7 +4,7 @@ on:
     workflow_dispatch:
     push:
         branches:
-            - master
+            - ipod_touch_1g
 
 jobs:
     linux:
@@ -20,3 +20,7 @@ jobs:
               run: ../configure --enable-sdl --disable-cocoa --target-list=arm-softmmu --disable-capstone --disable-pie --disable-slirp --extra-cflags=-I/usr/local/opt/openssl@3/include --extra-ldflags='-L/usr/local/opt/openssl@3/lib -lcrypto'
             - name: go 
               run: make
+            - uses: actions/upload-artifact@v2
+              with:
+                    name: build
+                    path: ./build/arm-softmmu/qemu-system-arm
