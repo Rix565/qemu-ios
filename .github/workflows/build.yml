@@ -1,24 +1,22 @@
-name: Build iPod emulator
+name: action-publish
 
-on: [push]
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - ipod_touch_1g
 
 jobs:
-  job_1:
-    name: Build iPod emulator
-    runs-on: ubuntu-latest
-    steps:
-      - shell: bash
-        run: |
-          sudo apt update
-          sudo apt install ninja-build meson libsdl2-dev libsdl1.2-dev
-          git clone --single-branch --branch ipod_touch_1g https://github.com/devos50/qemu.git --jobs 10
-          cd qemu
-          mkdir build
-          cd build
-          ../configure --enable-sdl --disable-cocoa --target-list=arm-softmmu --disable-capstone --disable-slirp --extra-cflags=-I/usr/include/openssl --extra-ldflags='-L/usr/lib -lcrypto' --enable-pie --disable-werror
-          make -j$(nproc)
-      - name: qemu
-        uses: actions/upload-artifact@v3
-        with:
-          name: qemu
-          path: qemu/
+    linux:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+            - name: deps
+              run: sudo apt-get install git libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev ninja-build libsdl2-dev
+            - name: build it lol
+              run: mkdir build && cd build && CFLAGS=-Wno-error ../configure --enable-sdl --disable-cocoa --target-list=arm-softmmu --disable-capstone --disable-slirp --extra-cflags=-I/usr/include/openssl --extra-ldflags='-L/usr/lib -lcrypto' --enable-pie --disable-werror && make
+            - uses: actions/upload-artifact@v2
+              with:
+                    name: build
+                    path: ./build/arm-softmmu/qemu-system-arm
